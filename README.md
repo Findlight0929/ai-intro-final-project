@@ -28,32 +28,26 @@ rumer2026/
 - `label`
 - `event`
 
-## 推荐目录结构
+## 项目结构
 
 ```text
 ai-intro-final-project/
 ├─ rumer2026/                # 原始数据集
 ├─ src/                      # 主要代码
+│  ├─ config.py              # 路径与字段配置
+│  ├─ preprocess.py          # 文本清洗
+│  ├─ train_baseline.py      # baseline 训练与验证
+│  ├─ predict.py             # 单条/批量预测
+│  └─ explain.py             # 判断依据生成
 ├─ models/                   # 训练得到的模型文件
-├─ outputs/                  # 预测结果、实验输出
+├─ outputs/                  # 预测结果、实验指标、解释样例
 ├─ notebooks/                # 数据分析与实验草稿
 ├─ report/                   # 报告和插图
 ├─ README.md
 ├─ requirements.txt
-├─ main.py
+├─ main.py                   # 单条文本预测入口
 └─ 小组分工方案.md
 ```
-
-## 当前代码说明
-
-当前已提供最小可开工框架：
-
-- `src/config.py`：路径与常量配置
-- `src/preprocess.py`：基础文本清洗
-- `src/train_baseline.py`：baseline 训练脚本
-- `src/predict.py`：单条/批量预测脚本
-- `src/explain.py`：解释文本生成模块
-- `main.py`：统一入口，用于单条文本预测与解释
 
 ## 环境安装
 
@@ -68,7 +62,7 @@ pip install -r requirements.txt
 ## 训练 baseline
 
 ```bash
-python src/train_baseline.py
+python -m src.train_baseline
 ```
 
 运行后将：
@@ -76,10 +70,14 @@ python src/train_baseline.py
 - 读取 `rumer2026/train.csv` 和 `rumer2026/val.csv`
 - 训练 `TF-IDF + Logistic Regression` baseline
 - 在验证集上输出 Accuracy 和分类报告
-- 将模型保存到 `models/`
-- 将验证集预测结果保存到 `outputs/`
+- 将模型保存到 `models/baseline_pipeline.joblib`
+- 将验证集预测结果保存到 `outputs/val_predictions.csv`
+- 将前 20 条解释样例保存到 `outputs/examples.csv`
+- 将指标保存到 `outputs/metrics.txt`
 
 ## 单条文本预测
+
+训练完成后运行：
 
 ```bash
 python main.py --text "Breaking news example text"
@@ -89,8 +87,31 @@ python main.py --text "Breaking news example text"
 
 ```text
 Label: 1
-Reason: The text is classified as rumor because it uses urgent or emotionally charged wording and does not provide a verifiable source.
+Reason: The text is classified as rumor because it contains rumor-related cues such as breaking; and it does not provide a clearly verifiable source in the text.
 ```
+
+## 批量预测
+
+训练完成后，也可以对 CSV 文件批量预测。输入文件需要包含 `text` 字段。
+
+```bash
+python -m src.predict --input rumer2026/val.csv --output outputs/batch_predictions.csv
+```
+
+## 当前最小可运行版本说明
+
+当前版本已经初步完成：
+
+- 成员 2 任务：数据读取、文本预处理、baseline 训练、验证集评估、预测结果保存
+- 成员 3 任务：基于规则的解释模块、单条解释输出、验证集解释样例保存
+
+后续可以继续优化：
+
+1. 对比 SVM、Naive Bayes、BERT 等模型
+2. 调整文本预处理和 TF-IDF 参数
+3. 使用模型高权重词增强解释质量
+4. 接入学校提供的大语言模型接口生成更自然的解释
+5. 在报告中加入错误案例分析和典型案例展示
 
 ## 小组协作建议
 
@@ -98,10 +119,3 @@ Reason: The text is classified as rumor because it uses urgent or emotionally ch
 - 建模同学负责 baseline 和模型改进
 - 解释模块同学负责判断依据生成和案例整理
 - 每位成员都应直接提交代码或文档，保留清晰 commit 记录
-
-## 当前待推进事项
-
-1. 跑通 baseline 并记录验证集结果
-2. 优化英文文本预处理与模型效果
-3. 补充更高质量的解释模块
-4. 完善报告和案例展示

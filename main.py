@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 
-from src.explain import generate_explanation
 from src.predict import predict_text
 
 
@@ -14,8 +13,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    label = predict_text(args.text)
-    reason = generate_explanation(args.text, label)
+    label, reason = predict_text(args.text)
 
     print(f"Label: {label}")
     print(f"Reason: {reason}")

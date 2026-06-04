@@ -14,3 +14,5 @@ ID_COLUMN = "id"
 
 MODEL_FILE = MODELS_DIR / "baseline_pipeline.joblib"
 VAL_PREDICTIONS_FILE = OUTPUTS_DIR / "val_predictions.csv"
+METRICS_FILE = OUTPUTS_DIR / "metrics.txt"
+EXAMPLES_FILE = OUTPUTS_DIR / "examples.csv"

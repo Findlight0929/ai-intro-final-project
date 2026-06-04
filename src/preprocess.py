@@ -1,3 +1,4 @@
+import html
 import re
 
 URL_PATTERN = re.compile(r"https?://\S+|www\.\S+")
@@ -9,9 +10,9 @@ def clean_text(text: str) -> str:
     if not isinstance(text, str):
         return ""
 
-    normalized = text.strip().lower()
-    normalized = URL_PATTERN.sub(" ", normalized)
-    normalized = MENTION_PATTERN.sub(" ", normalized)
-    normalized = normalized.replace("&amp;", "and")
+    normalized = html.unescape(text)
+    normalized = normalized.strip().lower()
+    normalized = URL_PATTERN.sub(" <url> ", normalized)
+    normalized = MENTION_PATTERN.sub(" <user> ", normalized)
     normalized = WHITESPACE_PATTERN.sub(" ", normalized)
     return normalized.strip()
