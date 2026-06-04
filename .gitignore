@@ -26,8 +26,10 @@ env/
 Thumbs.db
 
 # Data outputs and model artifacts
-outputs/
-models/
+outputs/*
+!outputs/.gitkeep
+models/*
+!models/.gitkeep
 *.pkl
 *.joblib
 *.pt
