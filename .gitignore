@@ -28,6 +28,7 @@ Thumbs.db
 # Data outputs and model artifacts
 outputs/*
 !outputs/.gitkeep
+!outputs/explainability_cases.csv
 models/*
 !models/.gitkeep
 *.pkl
