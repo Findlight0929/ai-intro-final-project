@@ -38,6 +38,7 @@ ai-intro-final-project/
 │  ├─ preprocess.py          # 文本清洗
 │  ├─ train_baseline.py      # baseline 训练与验证
 │  ├─ predict.py             # 单条/批量预测
+│  ├─ rag.py                 # RAG 相似训练样例检索
 │  └─ explain.py             # 判断依据生成
 ├─ models/                   # 训练得到的模型文件
 ├─ outputs/                  # 预测结果、实验指标、解释样例
@@ -87,7 +88,7 @@ python main.py --text "Breaking news example text"
 
 ```text
 Label: 1
-Reason: The text is classified as rumor because it contains rumor-related cues such as breaking; and it does not provide a clearly verifiable source in the text.
+Reason: The text is classified as rumor because it contains exaggerated, urgent, or emotionally provocative wording, such as breaking; and it does not provide an explicit source or confirmation cue. RAG context: 2/3 nearest training examples share the predicted rumor label, while the rest show mixed context.
 ```
 
 ## 批量预测
@@ -103,7 +104,7 @@ python -m src.predict --input rumer2026/val.csv --output outputs/batch_predictio
 当前版本已经初步完成：
 
 - 成员 2 任务：数据读取、文本预处理、baseline 训练、验证集评估、预测结果保存
-- 成员 3 任务：基于规则的解释模块、单条解释输出、验证集解释样例保存
+- 成员 3 任务：基于规则 + RAG 的解释模块、单条解释输出、验证集解释样例保存
 
 后续可以继续优化：
 

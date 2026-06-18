@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from src.preprocess import clean_text
+from src.rag import RetrievedExample, format_retrieved_examples, retrieve_relevant_examples
 
 
 EXAGGERATION_CUES = [
@@ -118,6 +119,7 @@ class ExplanationResult:
     label_name: str
     reason: str
     signals: list[ExplanationSignal]
+    retrieved_examples: list[RetrievedExample]
     llm_prompt: str
 
     def to_dict(self) -> dict[str, Any]:
@@ -132,6 +134,10 @@ class ExplanationResult:
                     "hits": signal.hits,
                 }
                 for signal in self.signals
+            ],
+            "retrieved_examples": [
+                example.to_dict()
+                for example in self.retrieved_examples
             ],
             "llm_prompt": self.llm_prompt,
         }
@@ -221,15 +227,47 @@ def _social_media_hits(cleaned_text: str) -> list[str]:
     return hits
 
 
-def generate_llm_prompt(text: str, label: int, signals: list[ExplanationSignal] | None = None) -> str:
+def _summarize_retrieval_context(examples: list[RetrievedExample], label: int) -> str:
+    if not examples:
+        return "RAG context: no sufficiently similar training example was retrieved."
+
+    label = int(label)
+    same_label_count = sum(1 for example in examples if example.label == label)
+    total_count = len(examples)
+    label_name = "rumor" if label == 1 else "non-rumor"
+
+    if same_label_count == total_count:
+        return (
+            f"RAG context: the {total_count} nearest training examples are also labeled "
+            f"{label_name}, so the prediction is close to similar learned cases."
+        )
+    if same_label_count > 0:
+        return (
+            f"RAG context: {same_label_count}/{total_count} nearest training examples share "
+            f"the predicted {label_name} label, while the rest show mixed context."
+        )
+    return (
+        "RAG context: the nearest training examples have different labels, "
+        "so this explanation should be treated cautiously."
+    )
+
+
+def generate_llm_prompt(
+    text: str,
+    label: int,
+    signals: list[ExplanationSignal] | None = None,
+    retrieved_examples: list[RetrievedExample] | None = None,
+) -> str:
     label_name = "rumor" if int(label) == 1 else "non-rumor"
     active_signals = signals or analyze_text_signals(text)
+    active_examples = retrieved_examples if retrieved_examples is not None else retrieve_relevant_examples(text)
     signal_lines = [
         f"- {signal.name}: {', '.join(signal.hits)}"
         for signal in active_signals
         if signal.has_hits
     ]
     signal_block = "\n".join(signal_lines) if signal_lines else "- no obvious rule signal"
+    retrieved_block = format_retrieved_examples(active_examples)
 
     return (
         "You are helping an explainable rumor-detection system.\n"
@@ -237,10 +275,12 @@ def generate_llm_prompt(text: str, label: int, signals: list[ExplanationSignal] 
         "Requirements:\n"
         "1. Do not claim the text is certainly true or false.\n"
         "2. Mention only observable textual cues.\n"
-        "3. Keep the explanation within 2 sentences.\n\n"
+        "3. Use retrieved training examples only as dataset context, not as proof.\n"
+        "4. Keep the explanation within 2 sentences.\n\n"
         f"Input text:\n{text}\n\n"
         f"Model prediction: {label_name} ({label})\n\n"
         f"Rule signals:\n{signal_block}\n\n"
+        f"Retrieved training examples:\n{retrieved_block}\n\n"
         "Explanation:"
     )
 
@@ -248,6 +288,7 @@ def generate_llm_prompt(text: str, label: int, signals: list[ExplanationSignal] 
 def generate_rule_based_explanation(text: str, label: int) -> ExplanationResult:
     label = int(label)
     signals = analyze_text_signals(text)
+    retrieved_examples = retrieve_relevant_examples(text)
     signal_map = {signal.name: signal for signal in signals}
 
     if label == 1:
@@ -297,12 +338,15 @@ def generate_rule_based_explanation(text: str, label: int) -> ExplanationResult:
         reason = "The text is classified as non-rumor because it " + "; and it ".join(reasons) + "."
         label_name = "non-rumor"
 
+    reason = f"{reason} {_summarize_retrieval_context(retrieved_examples, label)}"
+
     return ExplanationResult(
         label=label,
         label_name=label_name,
         reason=reason,
         signals=signals,
-        llm_prompt=generate_llm_prompt(text, label, signals),
+        retrieved_examples=retrieved_examples,
+        llm_prompt=generate_llm_prompt(text, label, signals, retrieved_examples),
     )
 
 
@@ -324,6 +368,7 @@ def generate_explanation_detail(text: str, label: int, use_llm: bool = False) ->
         label_name=result.label_name,
         reason=llm_reason,
         signals=result.signals,
+        retrieved_examples=result.retrieved_examples,
         llm_prompt=result.llm_prompt,
     )
 
