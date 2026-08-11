@@ -1,3 +1,9 @@
+> This repository is a fork of a team course project for Introduction to
+> Artificial Intelligence at Shanghai Jiao Tong University.
+>
+> My primary contribution was the explainability layer, including rule-based
+> explanations, TF-IDF retrieval, error analysis, and integration with the
+> classification workflow.
 # ai-intro-final-project
 
 人工智能导论大作业项目仓库，题目为**可解释的谣言检测**。
