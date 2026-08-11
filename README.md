@@ -21,7 +21,17 @@ standard deviation across five folds.
 ```bash
 python -m pip install -r requirements.txt
 python -m src.cross_validate_best_model
-# ai-intro-final-project
+```
+
+The command writes the fold-level results and summary to:
+
+- `outputs/cross_validation_results.csv`
+- `outputs/cross_validation_summary.txt`
+
+The committed summary makes the reported metrics auditable without requiring
+generated model binaries or per-example predictions.
+
+## 中文说明
 
 人工智能导论大作业项目仓库，题目为**可解释的谣言检测**。
 
@@ -60,6 +70,7 @@ ai-intro-final-project/
 │  ├─ config.py              # 路径与字段配置
 │  ├─ preprocess.py          # 文本清洗
 │  ├─ train_baseline.py      # baseline 训练与验证
+│  ├─ cross_validate_best_model.py # 最佳模型的五折交叉验证
 │  ├─ predict.py             # 单条/批量预测
 │  ├─ rag.py                 # RAG 相似训练样例检索
 │  └─ explain.py             # 判断依据生成
@@ -131,7 +142,7 @@ python -m src.predict --input rumer2026/val.csv --output outputs/batch_predictio
 
 后续可以继续优化：
 
-1. 对比 SVM、Naive Bayes、BERT 等模型
+1. 进一步比较 Linear SVM、Naive Bayes、BERT 等模型
 2. 调整文本预处理和 TF-IDF 参数
 3. 使用模型高权重词增强解释质量
 4. 接入学校提供的大语言模型接口生成更自然的解释
