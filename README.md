@@ -1,9 +1,26 @@
-> This repository is a fork of a team course project for Introduction to
-> Artificial Intelligence at Shanghai Jiao Tong University.
+# Explainable Rumor Detection
+
+> A team course project for Introduction to Artificial Intelligence at
+> Shanghai Jiao Tong University.
 >
 > My primary contribution was the explainability layer, including rule-based
 > explanations, TF-IDF retrieval, error analysis, and integration with the
 > classification workflow.
+
+## Results
+
+| Model | Evaluation | Accuracy | F1 |
+|---|---|---:|---:|
+| TF-IDF + Linear SVM | 5-fold stratified cross-validation | 85.14% ± 1.94% | 82.75% ± 2.03% |
+
+The evaluation uses `random_state=42`. Reported values are the mean and
+standard deviation across five folds.
+
+## Reproduction
+
+```bash
+python -m pip install -r requirements.txt
+python -m src.cross_validate_best_model
 # ai-intro-final-project
 
 人工智能导论大作业项目仓库，题目为**可解释的谣言检测**。
