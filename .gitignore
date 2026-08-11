@@ -29,6 +29,8 @@ Thumbs.db
 outputs/*
 !outputs/.gitkeep
 !outputs/explainability_cases.csv
+!outputs/cross_validation_results.csv
+!outputs/cross_validation_summary.txt
 models/*
 !models/.gitkeep
 *.pkl
